@@ -855,7 +855,7 @@ function setSelect(fieldId, val, label, triggerLabels){
   document.getElementById(fieldId).value = val;
   var disp = document.getElementById(fieldId+'-display');
   if(disp) disp.value = label || val;
-  hideSuggest('cs-'+fieldId);
+  var _cl=document.getElementById('cs-'+fieldId); if(_cl){_cl.classList.remove('open');_cl.style.display='none';}
   if(triggerLabels){ updateLabels(); saveForm(); }
   else {
     if(fieldId==='lift-type'){
@@ -902,6 +902,19 @@ function setSuggest(fieldId,val){
   if(el){el.value=val;el.dispatchEvent(new Event('input'));}
   hideSuggest(fieldId+'-suggest');
 }
+// Touch-friendly dropdown handling: open the tapped field's list, close all
+// others, and close everything when tapping outside a field. Fixes menus that
+// stayed open on touch devices (no mouseleave) and the delay after selecting.
+document.addEventListener('click',function(e){
+  var t=e.target;
+  var insideList=t.closest?t.closest('.suggest-list'):null;
+  var field=t.closest?t.closest('.field'):null;
+  var thisList=field?field.querySelector('.suggest-list'):null;
+  document.querySelectorAll('.suggest-list').forEach(function(list){
+    if(list!==thisList){list.classList.remove('open');list.style.display='none';}
+  });
+  if(thisList&&!insideList){thisList.classList.add('open');thisList.style.display='block';}
+});
 
 function saveJBSettings(){
   var j10=document.getElementById('jb-j10').value;
